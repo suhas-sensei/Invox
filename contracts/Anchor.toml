@@ -29,7 +29,7 @@ proof_verifier = "JCPDvoeEH4Qt1DW1CrvjbXu4akrw6APKBGr6H73cmbgU"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

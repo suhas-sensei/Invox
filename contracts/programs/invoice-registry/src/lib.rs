@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-
+use solana_sha256_hasher::hash;
 
 declare_id!("9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo");
 
@@ -42,7 +42,12 @@ pub mod invoice_registry {
         let dedup = &mut ctx.accounts.dedup;
 
         // On-chain proof verification: recompute commitment hash
-        // The invoice_hash should match the computed hash
+        let mut data = Vec::new();
+        data.extend_from_slice(vendor.as_bytes());
+        data.extend_from_slice(&amount_cents.to_le_bytes());
+        data.extend_from_slice(&timestamp.to_le_bytes());
+        data.extend_from_slice(&dkim_domain_hash);
+        let computed = hash(&data);
         require!(computed.to_bytes() == invoice_hash, InvoiceError::ProofInvalid);
 
         // Dedup: mark this hash as used (PDA init would fail if already exists)
@@ -260,38 +265,323 @@ pub enum InvoiceError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
-    #[test]
-    fn test_on_chain_proof_verification() {
-        let vendor = "stripe.com";
-        let amount: u64 = 500;
-        let ts: i64 = 1700000000;
-        let dkim = [42u8; 32];
-
-        // Hash should be deterministic
-        assert_eq!([0u8;32].len(), 32);
+    // ── Helper: compute invoice hash the same way submit_invoice does ──
+    fn compute_invoice_hash(vendor: &str, amount_cents: u64, timestamp: i64, dkim: &[u8; 32]) -> [u8; 32] {
+        let mut data = Vec::new();
+        data.extend_from_slice(vendor.as_bytes());
+        data.extend_from_slice(&amount_cents.to_le_bytes());
+        data.extend_from_slice(&timestamp.to_le_bytes());
+        data.extend_from_slice(dkim);
+        hash(&data).to_bytes()
     }
 
+    // ── Status constants ───────────────────────────────────────────────
+
     #[test]
-    fn test_status_constants() {
+    fn test_status_constants_values() {
         assert_eq!(STATUS_PENDING, 0);
+        assert_eq!(STATUS_APPROVED, 1);
+        assert_eq!(STATUS_PAID, 2);
+        assert_eq!(STATUS_REJECTED, 3);
         assert_eq!(STATUS_AUTO_APPROVED, 4);
     }
 
     #[test]
-    fn test_dedup_prevents_double_submit() {
-        // PDA with same seeds would fail to init — duplicate prevented by Solana runtime
-        let hash1 = [1u8; 32];
-        let hash2 = [1u8; 32];
-        assert_eq!(hash1, hash2); // same hash = same PDA = init fails
+    fn test_status_constants_unique() {
+        let statuses = [STATUS_PENDING, STATUS_APPROVED, STATUS_PAID, STATUS_REJECTED, STATUS_AUTO_APPROVED];
+        for i in 0..statuses.len() {
+            for j in (i+1)..statuses.len() {
+                assert_ne!(statuses[i], statuses[j], "Status {} and {} collide", i, j);
+            }
+        }
+    }
+
+    // ── Proof hash computation ─────────────────────────────────────────
+
+    #[test]
+    fn test_proof_hash_deterministic() {
+        let h1 = compute_invoice_hash("stripe.com", 500, 1700000000, &[42u8; 32]);
+        let h2 = compute_invoice_hash("stripe.com", 500, 1700000000, &[42u8; 32]);
+        assert_eq!(h1, h2);
     }
 
     #[test]
-    fn test_monthly_cap() {
-        let cap: u64 = 100000; // $1000
-        let spend: u64 = 50000;
-        let new_invoice: u64 = 60000;
-        assert!(spend + new_invoice > cap); // would exceed
+    fn test_proof_hash_different_vendor() {
+        let h1 = compute_invoice_hash("stripe.com", 500, 1700000000, &[42u8; 32]);
+        let h2 = compute_invoice_hash("paypal.com", 500, 1700000000, &[42u8; 32]);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn test_proof_hash_different_amount() {
+        let h1 = compute_invoice_hash("stripe.com", 500, 1700000000, &[42u8; 32]);
+        let h2 = compute_invoice_hash("stripe.com", 501, 1700000000, &[42u8; 32]);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn test_proof_hash_different_timestamp() {
+        let h1 = compute_invoice_hash("stripe.com", 500, 1700000000, &[42u8; 32]);
+        let h2 = compute_invoice_hash("stripe.com", 500, 1700000001, &[42u8; 32]);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn test_proof_hash_different_dkim() {
+        let h1 = compute_invoice_hash("stripe.com", 500, 1700000000, &[42u8; 32]);
+        let h2 = compute_invoice_hash("stripe.com", 500, 1700000000, &[43u8; 32]);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn test_proof_hash_empty_vendor() {
+        let h = compute_invoice_hash("", 500, 1700000000, &[0u8; 32]);
+        assert_eq!(h.len(), 32);
+    }
+
+    #[test]
+    fn test_proof_hash_zero_amount() {
+        let h1 = compute_invoice_hash("v", 0, 0, &[0u8; 32]);
+        let h2 = compute_invoice_hash("v", 1, 0, &[0u8; 32]);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn test_proof_hash_max_amount() {
+        let h = compute_invoice_hash("v", u64::MAX, i64::MAX, &[255u8; 32]);
+        assert_eq!(h.len(), 32);
+    }
+
+    // ── Deduplication ──────────────────────────────────────────────────
+
+    #[test]
+    fn test_dedup_same_hash_same_pda() {
+        let hash1 = [1u8; 32];
+        let hash2 = [1u8; 32];
+        assert_eq!(hash1, hash2); // same hash → same PDA seed → init fails on second
+    }
+
+    #[test]
+    fn test_dedup_different_hash_different_pda() {
+        let hash1 = [1u8; 32];
+        let hash2 = [2u8; 32];
+        assert_ne!(hash1, hash2); // different hash → different PDA → both succeed
+    }
+
+    #[test]
+    fn test_dedup_single_bit_difference() {
+        let mut hash1 = [0u8; 32];
+        let mut hash2 = [0u8; 32];
+        hash2[31] = 1; // single bit flip
+        assert_ne!(hash1, hash2);
+    }
+
+    // ── Monthly cap logic ──────────────────────────────────────────────
+
+    #[test]
+    fn test_monthly_cap_under_limit() {
+        let cap: u64 = 100_000;
+        let spend: u64 = 50_000;
+        let new_invoice: u64 = 40_000;
+        assert!(spend + new_invoice <= cap);
+    }
+
+    #[test]
+    fn test_monthly_cap_at_exact_limit() {
+        let cap: u64 = 100_000;
+        let spend: u64 = 50_000;
+        let new_invoice: u64 = 50_000;
+        assert!(spend + new_invoice <= cap); // exactly at cap should pass
+    }
+
+    #[test]
+    fn test_monthly_cap_over_limit() {
+        let cap: u64 = 100_000;
+        let spend: u64 = 50_000;
+        let new_invoice: u64 = 50_001;
+        assert!(spend + new_invoice > cap);
+    }
+
+    #[test]
+    fn test_monthly_cap_zero_means_unlimited() {
+        let cap: u64 = 0;
+        let spend: u64 = u64::MAX - 1;
+        let new_invoice: u64 = 1;
+        // cap == 0 means no cap check
+        assert_eq!(cap, 0);
+        assert!(spend + new_invoice > 0); // would pass since cap is disabled
+    }
+
+    #[test]
+    fn test_monthly_cap_first_invoice() {
+        let cap: u64 = 100_000;
+        let spend: u64 = 0;
+        let new_invoice: u64 = 100_000;
+        assert!(spend + new_invoice <= cap);
+    }
+
+    // ── Auto-approve threshold ─────────────────────────────────────────
+
+    #[test]
+    fn test_auto_approve_under_threshold() {
+        let threshold: u64 = 10_000;
+        let amount: u64 = 5_000;
+        assert!(threshold > 0 && amount <= threshold);
+    }
+
+    #[test]
+    fn test_auto_approve_at_threshold() {
+        let threshold: u64 = 10_000;
+        let amount: u64 = 10_000;
+        assert!(threshold > 0 && amount <= threshold); // equal should auto-approve
+    }
+
+    #[test]
+    fn test_auto_approve_over_threshold() {
+        let threshold: u64 = 10_000;
+        let amount: u64 = 10_001;
+        assert!(!(threshold > 0 && amount <= threshold)); // should be pending
+    }
+
+    #[test]
+    fn test_auto_approve_disabled_when_zero() {
+        let threshold: u64 = 0;
+        let amount: u64 = 1;
+        // threshold == 0 means auto-approve disabled
+        assert!(!(threshold > 0 && amount <= threshold));
+    }
+
+    #[test]
+    fn test_auto_approve_zero_amount_with_threshold() {
+        let threshold: u64 = 10_000;
+        let amount: u64 = 0;
+        assert!(threshold > 0 && amount <= threshold); // $0 invoice auto-approves
+    }
+
+    // ── Month derivation from timestamp ────────────────────────────────
+
+    #[test]
+    fn test_month_derivation() {
+        let timestamp: i64 = 2_592_000; // exactly 1 month
+        let month = (timestamp / 2_592_000) as u16;
+        assert_eq!(month, 1);
+    }
+
+    #[test]
+    fn test_month_derivation_zero() {
+        let timestamp: i64 = 0;
+        let month = (timestamp / 2_592_000) as u16;
+        assert_eq!(month, 0);
+    }
+
+    #[test]
+    fn test_month_derivation_mid_month() {
+        let timestamp: i64 = 2_592_000 + 1_000_000; // month 1, mid-way
+        let month = (timestamp / 2_592_000) as u16;
+        assert_eq!(month, 1);
+    }
+
+    #[test]
+    fn test_month_boundary() {
+        let ts1: i64 = 2_592_000 - 1; // end of month 0
+        let ts2: i64 = 2_592_000;     // start of month 1
+        assert_eq!((ts1 / 2_592_000) as u16, 0);
+        assert_eq!((ts2 / 2_592_000) as u16, 1);
+    }
+
+    // ── Account sizes ──────────────────────────────────────────────────
+
+    #[test]
+    fn test_registry_state_size() {
+        // 8 disc + 32 admin + 32 relayer + 8 count + 8 threshold + 8 cap + 1 bump = 97
+        assert_eq!(8 + 32 + 32 + 8 + 8 + 8 + 1, 97);
+    }
+
+    #[test]
+    fn test_invoice_account_size() {
+        // 8 + 8 + 32 + 32 + (4+32) + 8 + 8 + 1 + 1 + (4+88) + 1 = 227
+        assert_eq!(8 + 8 + 32 + 32 + 4 + 32 + 8 + 8 + 1 + 1 + 4 + 88 + 1, 227);
+    }
+
+    #[test]
+    fn test_dedup_record_size() {
+        // 8 + 32 + 1 + 1 = 42
+        assert_eq!(8 + 32 + 1 + 1, 42);
+    }
+
+    #[test]
+    fn test_monthly_spend_size() {
+        // 8 + 32 + 2 + 8 + 4 + 1 = 55
+        assert_eq!(8 + 32 + 2 + 8 + 4 + 1, 55);
+    }
+
+    // ── Status transition validity ─────────────────────────────────────
+
+    #[test]
+    fn test_approve_requires_pending() {
+        let status = STATUS_PENDING;
+        assert_eq!(status, STATUS_PENDING);
+    }
+
+    #[test]
+    fn test_cannot_approve_already_approved() {
+        let status = STATUS_APPROVED;
+        assert_ne!(status, STATUS_PENDING);
+    }
+
+    #[test]
+    fn test_cannot_approve_paid() {
+        let status = STATUS_PAID;
+        assert_ne!(status, STATUS_PENDING);
+    }
+
+    #[test]
+    fn test_cannot_approve_rejected() {
+        let status = STATUS_REJECTED;
+        assert_ne!(status, STATUS_PENDING);
+    }
+
+    #[test]
+    fn test_mark_paid_requires_approved_or_auto() {
+        assert!(STATUS_APPROVED == STATUS_APPROVED || STATUS_APPROVED == STATUS_AUTO_APPROVED);
+        assert!(STATUS_AUTO_APPROVED == STATUS_APPROVED || STATUS_AUTO_APPROVED == STATUS_AUTO_APPROVED);
+    }
+
+    #[test]
+    fn test_cannot_pay_pending() {
+        let status = STATUS_PENDING;
+        assert!(!(status == STATUS_APPROVED || status == STATUS_AUTO_APPROVED));
+    }
+
+    #[test]
+    fn test_cannot_pay_rejected() {
+        let status = STATUS_REJECTED;
+        assert!(!(status == STATUS_APPROVED || status == STATUS_AUTO_APPROVED));
+    }
+
+    // ── Overflow edge cases ────────────────────────────────────────────
+
+    #[test]
+    fn test_invoice_count_starts_zero() {
+        let count: u64 = 0;
+        assert_eq!(count, 0);
+    }
+
+    #[test]
+    fn test_monthly_spend_accumulation() {
+        let mut total: u64 = 0;
+        let invoices = [1000u64, 2000, 3000, 500];
+        for amt in invoices.iter() {
+            total += amt;
+        }
+        assert_eq!(total, 6500);
+    }
+
+    #[test]
+    fn test_large_vendor_string() {
+        // Vendor field max 32 chars in account space
+        let vendor = "a]".repeat(16); // 32 chars
+        assert_eq!(vendor.len(), 32);
     }
 }

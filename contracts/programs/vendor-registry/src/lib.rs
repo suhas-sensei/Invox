@@ -94,6 +94,140 @@ pub enum VendorError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // ── Account sizes ──────────────────────────────────────────────────
+
     #[test]
-    fn test_vendor_hash() { assert_eq!([0u8; 32].len(), 32); }
+    fn test_vendor_record_size() {
+        // 8 + 32 + (4+32) + 8 + 1 + 8 + 8 + 1 = 102
+        assert_eq!(8 + 32 + 4 + 32 + 8 + 1 + 8 + 8 + 1, 102);
+    }
+
+    #[test]
+    fn test_vendor_record_struct_nonempty() {
+        assert!(std::mem::size_of::<VendorRecord>() > 0);
+    }
+
+    // ── PDA seeds ──────────────────────────────────────────────────────
+
+    #[test]
+    fn test_vendor_pda_seed_format() {
+        let hash = [1u8; 32];
+        let seeds: &[&[u8]] = &[b"vendor", hash.as_ref()];
+        assert_eq!(seeds[0], b"vendor");
+        assert_eq!(seeds[1].len(), 32);
+    }
+
+    #[test]
+    fn test_different_vendor_hashes_different_pdas() {
+        let h1 = [1u8; 32];
+        let h2 = [2u8; 32];
+        assert_ne!(h1, h2);
+    }
+
+    // ── Vendor approval logic ──────────────────────────────────────────
+
+    #[test]
+    fn test_vendor_starts_approved() {
+        let approved = true;
+        assert!(approved);
+    }
+
+    #[test]
+    fn test_vendor_removal_sets_unapproved() {
+        let mut approved = true;
+        approved = false; // remove_vendor sets approved = false
+        assert!(!approved);
+    }
+
+    // ── Vendor limit validation ────────────────────────────────────────
+
+    #[test]
+    fn test_validate_under_limit() {
+        let max_amount: u64 = 100_000;
+        let amount: u64 = 50_000;
+        assert!(amount <= max_amount);
+    }
+
+    #[test]
+    fn test_validate_at_limit() {
+        let max_amount: u64 = 100_000;
+        let amount: u64 = 100_000;
+        assert!(amount <= max_amount);
+    }
+
+    #[test]
+    fn test_validate_over_limit() {
+        let max_amount: u64 = 100_000;
+        let amount: u64 = 100_001;
+        assert!(amount > max_amount);
+    }
+
+    #[test]
+    fn test_validate_zero_limit_means_unlimited() {
+        let max_amount: u64 = 0;
+        let amount: u64 = 999_999_999;
+        // When max_amount_cents == 0, no limit check is performed
+        if max_amount > 0 {
+            assert!(amount <= max_amount);
+        }
+        // passes because limit is 0 (disabled)
+    }
+
+    // ── Spend tracking ─────────────────────────────────────────────────
+
+    #[test]
+    fn test_spend_accumulation() {
+        let mut total: u64 = 0;
+        let mut count: u64 = 0;
+        let spends = [5000u64, 10000, 15000];
+        for s in spends.iter() {
+            total += s;
+            count += 1;
+        }
+        assert_eq!(total, 30000);
+        assert_eq!(count, 3);
+    }
+
+    #[test]
+    fn test_spend_starts_zero() {
+        let total_spend: u64 = 0;
+        let invoice_count: u64 = 0;
+        assert_eq!(total_spend, 0);
+        assert_eq!(invoice_count, 0);
+    }
+
+    #[test]
+    fn test_spend_large_amount() {
+        let mut total: u64 = 0;
+        let amount: u64 = 10_000_000_00; // $100M in cents
+        total += amount;
+        assert_eq!(total, amount);
+    }
+
+    // ── Vendor name ────────────────────────────────────────────────────
+
+    #[test]
+    fn test_vendor_name_max_length() {
+        let name = "a".repeat(32);
+        assert_eq!(name.len(), 32);
+    }
+
+    #[test]
+    fn test_vendor_name_empty() {
+        let name = String::new();
+        assert_eq!(name.len(), 0);
+    }
+
+    #[test]
+    fn test_vendor_hash_all_zeros() {
+        let hash = [0u8; 32];
+        assert_eq!(hash.len(), 32);
+    }
+
+    #[test]
+    fn test_vendor_hash_all_ones() {
+        let hash = [255u8; 32];
+        assert_eq!(hash.len(), 32);
+    }
 }

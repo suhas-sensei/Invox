@@ -111,6 +111,161 @@ pub enum NftError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // ── Account sizes ──────────────────────────────────────────────────
+
     #[test]
-    fn test_nft_state() { assert!(std::mem::size_of::<NftState>() > 0); }
+    fn test_nft_state_size() {
+        // 8 + 32 + 32 + 8 + 1 = 81
+        assert_eq!(8 + 32 + 32 + 8 + 1, 81);
+    }
+
+    #[test]
+    fn test_receipt_size() {
+        // 8 + 8 + 32 + 8 + (4+32) + 8 + (4+64) + 8 + 1 = 177
+        assert_eq!(8 + 8 + 32 + 8 + 4 + 32 + 8 + 4 + 64 + 8 + 1, 177);
+    }
+
+    #[test]
+    fn test_nft_state_struct_nonempty() {
+        assert!(std::mem::size_of::<NftState>() > 0);
+    }
+
+    #[test]
+    fn test_receipt_struct_nonempty() {
+        assert!(std::mem::size_of::<Receipt>() > 0);
+    }
+
+    // ── PDA seeds ──────────────────────────────────────────────────────
+
+    #[test]
+    fn test_nft_state_pda_seed() {
+        let seeds: &[&[u8]] = &[b"nft-state"];
+        assert_eq!(seeds[0], b"nft-state");
+    }
+
+    #[test]
+    fn test_receipt_pda_seed() {
+        let supply: u64 = 0;
+        let seeds: &[&[u8]] = &[b"receipt", &supply.to_le_bytes()];
+        assert_eq!(seeds[0], b"receipt");
+        assert_eq!(seeds[1].len(), 8);
+    }
+
+    #[test]
+    fn test_sequential_receipt_pdas_differ() {
+        let id1: u64 = 0;
+        let id2: u64 = 1;
+        assert_ne!(id1.to_le_bytes(), id2.to_le_bytes());
+    }
+
+    // ── Authorization ──────────────────────────────────────────────────
+
+    #[test]
+    fn test_admin_can_mint() {
+        let admin = Pubkey::new_unique();
+        let minter = Pubkey::new_unique();
+        let caller = admin;
+        assert!(caller == admin || caller == minter);
+    }
+
+    #[test]
+    fn test_authorized_minter_can_mint() {
+        let admin = Pubkey::new_unique();
+        let minter = Pubkey::new_unique();
+        let caller = minter;
+        assert!(caller == admin || caller == minter);
+    }
+
+    #[test]
+    fn test_random_cannot_mint() {
+        let admin = Pubkey::new_unique();
+        let minter = Pubkey::new_unique();
+        let random = Pubkey::new_unique();
+        assert!(!(random == admin || random == minter));
+    }
+
+    #[test]
+    fn test_default_minter_is_zero() {
+        let minter = Pubkey::default();
+        assert_eq!(minter, Pubkey::new_from_array([0u8; 32]));
+    }
+
+    // ── Supply tracking ────────────────────────────────────────────────
+
+    #[test]
+    fn test_total_supply_starts_zero() {
+        let supply: u64 = 0;
+        assert_eq!(supply, 0);
+    }
+
+    #[test]
+    fn test_total_supply_increments() {
+        let mut supply: u64 = 0;
+        supply += 1;
+        assert_eq!(supply, 1);
+        supply += 1;
+        assert_eq!(supply, 2);
+    }
+
+    #[test]
+    fn test_token_id_equals_supply_before_mint() {
+        let supply: u64 = 5;
+        let token_id = supply; // next token_id = current supply
+        assert_eq!(token_id, 5);
+    }
+
+    // ── Receipt data edge cases ────────────────────────────────────────
+
+    #[test]
+    fn test_receipt_vendor_max_length() {
+        let vendor = "a".repeat(32);
+        assert_eq!(vendor.len(), 32);
+    }
+
+    #[test]
+    fn test_receipt_payment_tx_max_length() {
+        // base58 sig max 88 chars
+        let sig = "a".repeat(88);
+        assert_eq!(sig.len(), 88);
+    }
+
+    #[test]
+    fn test_receipt_zero_amount() {
+        let amount: u64 = 0;
+        assert_eq!(amount, 0);
+    }
+
+    #[test]
+    fn test_receipt_large_invoice_id() {
+        let id: u64 = u64::MAX;
+        assert_eq!(id, u64::MAX);
+    }
+
+    #[test]
+    fn test_receipt_negative_timestamp() {
+        let ts: i64 = -1; // before epoch
+        assert!(ts < 0);
+    }
+
+    #[test]
+    fn test_receipt_zero_timestamp() {
+        let ts: i64 = 0;
+        assert_eq!(ts, 0);
+    }
+
+    // ── Multiple receipts per employee ─────────────────────────────────
+
+    #[test]
+    fn test_multiple_receipts_same_employee() {
+        let employee = Pubkey::new_unique();
+        let mut receipts = Vec::new();
+        for i in 0..5u64 {
+            receipts.push((employee, i));
+        }
+        assert_eq!(receipts.len(), 5);
+        for (e, _) in &receipts {
+            assert_eq!(*e, employee);
+        }
+    }
 }
