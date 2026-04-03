@@ -247,7 +247,7 @@ function DashboardContent() {
                   <p className="text-xs text-white/70 uppercase tracking-wider">Receive in</p>
                   <button
                     onClick={async () => {
-                      const tokens: string[] = [SEPOLIA_TOKENS.SOL, SEPOLIA_TOKENS.USDC, SEPOLIA_TOKENS.ETH];
+                      const tokens: string[] = [SEPOLIA_TOKENS.SOL, SEPOLIA_TOKENS.USDC, SEPOLIA_TOKENS.USDT];
                       const idx = tokens.indexOf(preferredToken);
                       const next = tokens[(idx + 1) % tokens.length];
                       setPreferredToken(next);
@@ -262,7 +262,7 @@ function DashboardContent() {
                     }}
                     className="text-sm font-bold text-white hover:text-white/70 transition-colors"
                   >
-                    {{ [SEPOLIA_TOKENS.SOL]: "SOL", [SEPOLIA_TOKENS.USDC]: "USDC", [SEPOLIA_TOKENS.ETH]: "ETH" }[preferredToken] || "SOL"}
+                    {{ [SEPOLIA_TOKENS.SOL]: "SOL", [SEPOLIA_TOKENS.USDC]: "USDC", [SEPOLIA_TOKENS.USDT]: "USDT" }[preferredToken] || "SOL"}
                   </button>
                 </div>
               </div>

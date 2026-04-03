@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   try {
     const token = await getPreferredToken(employee);
     // Zero address means not set
-    const isZero = token === "0x0" || BigInt(token) === 0n;
+    const isZero = !token || token === "0x0";
     return NextResponse.json({ token: isZero ? null : token });
   } catch {
     return NextResponse.json({ token: null });

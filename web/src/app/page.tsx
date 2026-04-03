@@ -36,7 +36,7 @@ type Phase = "cycling" | "stacking" | "spread" | "line";
 
 export default function Home() {
   const { isConnected } = useSolanaWallet();
-  const { setVisible } = useWalletModal();
+  const { setVisible: openWalletModal } = useWalletModal();
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [activeImage, setActiveImage] = useState(-1);
@@ -401,7 +401,7 @@ export default function Home() {
             <button
               onClick={async () => {
                 if (!isConnected) {
-                  setVisible(true); await new Promise(r => setTimeout(r, 2000));
+                  openWalletModal(true); await new Promise(r => setTimeout(r, 2000));
                   // Small delay for wallet session to settle before navigating
                   setTimeout(() => router.push("/employee"), 500);
                 } else {
@@ -416,7 +416,7 @@ export default function Home() {
             <button
               onClick={async () => {
                 if (!isConnected) {
-                  setVisible(true); await new Promise(r => setTimeout(r, 2000));
+                  openWalletModal(true); await new Promise(r => setTimeout(r, 2000));
                   setTimeout(() => router.push("/admin/dashboard"), 500);
                 } else {
                   router.push("/admin/dashboard");
