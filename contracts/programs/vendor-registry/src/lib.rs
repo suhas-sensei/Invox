@@ -23,6 +23,17 @@ pub mod vendor_registry {
         Ok(())
     }
 
+    /// CPI target: validate vendor is approved and amount is within limits
+    pub fn validate_vendor(ctx: Context<ValidateVendor>, amount_cents: u64) -> Result<()> {
+        let v = &ctx.accounts.vendor;
+        require!(v.approved, VendorError::NotApproved);
+        if v.max_amount_cents > 0 {
+            require!(amount_cents <= v.max_amount_cents, VendorError::ExceedsLimit);
+        }
+        Ok(())
+    }
+
+    /// CPI target: record spend after successful invoice submission
     pub fn record_spend(ctx: Context<RecordSpend>, amount_cents: u64) -> Result<()> {
         let v = &mut ctx.accounts.vendor;
         v.total_spend += amount_cents;
@@ -45,7 +56,7 @@ pub struct VendorRecord {
 #[derive(Accounts)]
 #[instruction(vendor_hash: [u8; 32])]
 pub struct RegisterVendor<'info> {
-    #[account(init, payer = admin, space = 8 + 32 + 4 + 32 + 8 + 1 + 8 + 8 + 1, seeds = [b"vendor", vendor_hash.as_ref()], bump)]
+    #[account(init, payer = admin, space = 8 + 32 + 4+32 + 8 + 1 + 8 + 8 + 1, seeds = [b"vendor", vendor_hash.as_ref()], bump)]
     pub vendor: Account<'info, VendorRecord>,
     #[account(mut)]
     pub admin: Signer<'info>,
@@ -60,18 +71,29 @@ pub struct ModifyVendor<'info> {
 }
 
 #[derive(Accounts)]
+pub struct ValidateVendor<'info> {
+    pub vendor: Account<'info, VendorRecord>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
 pub struct RecordSpend<'info> {
     #[account(mut)]
     pub vendor: Account<'info, VendorRecord>,
     pub authority: Signer<'info>,
 }
 
+#[error_code]
+pub enum VendorError {
+    #[msg("Vendor not approved")]
+    NotApproved,
+    #[msg("Amount exceeds vendor limit")]
+    ExceedsLimit,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
-    fn test_vendor_record() {
-        let hash = [0u8; 32];
-        assert_eq!(hash.len(), 32);
-    }
+    fn test_vendor_hash() { assert_eq!([0u8; 32].len(), 32); }
 }

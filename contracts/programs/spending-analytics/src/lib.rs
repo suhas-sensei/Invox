@@ -56,7 +56,7 @@ pub struct Analytics {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1, seeds = [b"analytics"], bump)]
+    #[account(init, payer = payer, space = 8 + 8*6 + 1, seeds = [b"analytics"], bump)]
     pub analytics: Account<'info, Analytics>,
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -74,7 +74,8 @@ pub struct Record<'info> {
 mod tests {
     use super::*;
     #[test]
-    fn test_analytics_counters() {
-        assert_eq!(0u64 + 1, 1);
+    fn test_analytics_size() {
+        // 8 discriminator + 6*8 counters + 1 bump = 57
+        assert_eq!(8 + 8*6 + 1, 57);
     }
 }

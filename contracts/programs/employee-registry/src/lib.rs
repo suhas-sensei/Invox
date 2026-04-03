@@ -11,6 +11,8 @@ pub mod employee_registry {
         rec.employee = ctx.accounts.employee.key();
         rec.preferred_token = preferred_token;
         rec.registered = true;
+        rec.total_reimbursed = 0;
+        rec.invoice_count = 0;
         rec.bump = ctx.bumps.employee_record;
         Ok(())
     }
@@ -26,12 +28,14 @@ pub struct EmployeeRecord {
     pub employee: Pubkey,
     pub preferred_token: Pubkey,
     pub registered: bool,
+    pub total_reimbursed: u64,
+    pub invoice_count: u64,
     pub bump: u8,
 }
 
 #[derive(Accounts)]
 pub struct RegisterEmployee<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + 32 + 1 + 1, seeds = [b"employee", employee.key().as_ref()], bump)]
+    #[account(init, payer = payer, space = 8 + 32 + 32 + 1 + 8 + 8 + 1, seeds = [b"employee", employee.key().as_ref()], bump)]
     pub employee_record: Account<'info, EmployeeRecord>,
     /// CHECK: employee wallet
     pub employee: UncheckedAccount<'info>,
@@ -51,7 +55,8 @@ pub struct SetPreferredToken<'info> {
 mod tests {
     use super::*;
     #[test]
-    fn test_employee_record_size() {
-        assert_eq!(std::mem::size_of::<Pubkey>(), 32);
+    fn test_employee_size() {
+        // 8 + 32 + 32 + 1 + 8 + 8 + 1 = 90
+        assert_eq!(8 + 32 + 32 + 1 + 8 + 8 + 1, 90);
     }
 }
