@@ -6,13 +6,30 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-zvoice = "HzTbJF5WV2nVPUqnZ5aVRj5akdFw7MWbUFEaFRp8mp5c"
+invoice_registry = "9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo"
+employee_registry = "FJoYF2xDCeCkaFxEL7gXuavy6cWJ3mbtzwsock1h73bo"
+treasury = "5G17KZKSoRdMhzqGg95uHH8skPbppJZFmtSMEiMSnWwC"
+vendor_registry = "9x3wUkmGKZNDuK5qtNjgdBCbUZKfaQ2SNs1g4DPU6AEp"
+multisig_approver = "6wwGHtUjCVWqjH7UBg7YhUV5dVdPhRT9axCa7iQM8p73"
+reimbursement_nft = "BN6ry1pAjXhibJNS4h8Fseqi8KTge6dmkxTAnnoc71Ng"
+spending_analytics = "6rxb4Zmjaw9QF7a9CsFsQPCWqAQ6roiuW9BBg2fAgYSn"
+proof_verifier = "JCPDvoeEH4Qt1DW1CrvjbXu4akrw6APKBGr6H73cmbgU"
+
+[programs.devnet]
+invoice_registry = "9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo"
+employee_registry = "FJoYF2xDCeCkaFxEL7gXuavy6cWJ3mbtzwsock1h73bo"
+treasury = "5G17KZKSoRdMhzqGg95uHH8skPbppJZFmtSMEiMSnWwC"
+vendor_registry = "9x3wUkmGKZNDuK5qtNjgdBCbUZKfaQ2SNs1g4DPU6AEp"
+multisig_approver = "6wwGHtUjCVWqjH7UBg7YhUV5dVdPhRT9axCa7iQM8p73"
+reimbursement_nft = "BN6ry1pAjXhibJNS4h8Fseqi8KTge6dmkxTAnnoc71Ng"
+spending_analytics = "6rxb4Zmjaw9QF7a9CsFsQPCWqAQ6roiuW9BBg2fAgYSn"
+proof_verifier = "JCPDvoeEH4Qt1DW1CrvjbXu4akrw6APKBGr6H73cmbgU"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
