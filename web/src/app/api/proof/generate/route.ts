@@ -51,14 +51,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Truncate vendor to max 31 chars for felt252
-    const vendorShort = proof.vendor.slice(0, 31);
-
     // Submit verified invoice on-chain
     const { invoiceId, txHash } = await submitInvoiceOnChain({
       invoiceHash: proof.invoiceHash,
       employee: employeeAddress,
-      vendor: shortStringToFelt(vendorShort),
+      vendor: proof.vendor.slice(0, 32),
       amountCents: proof.amountCents,
       timestamp: proof.timestamp,
     });

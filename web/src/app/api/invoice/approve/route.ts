@@ -56,12 +56,10 @@ export async function POST(request: NextRequest) {
       const emp = employeeAddress || invoice?.employee || "";
       const vendor = invoice?.vendor || "";
       const amount = amountCents || invoice?.amountCents || 0;
-      const vendorFelt = shortStringToFelt(vendor.slice(0, 31));
-
       const nft = await mintReceiptNFT({
         employee: emp,
         invoiceId,
-        vendor: vendorFelt,
+        vendor: vendor.slice(0, 32),
         amountCents: amount,
         paymentTx,
         timestamp: Math.floor(Date.now() / 1000),

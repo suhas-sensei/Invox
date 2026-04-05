@@ -1,6 +1,7 @@
 import { Connection, PublicKey, Keypair, SystemProgram, Transaction } from "@solana/web3.js";
 import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import type { Idl } from "@coral-xyz/anchor";
+import { createHash } from "crypto";
 import type { Invoice } from "./types";
 import { parseStatus } from "./types";
 
@@ -230,19 +231,24 @@ export async function submitInvoiceOnChain(params: {
   const invoiceId = state.invoiceCount.toNumber();
   const [invoicePda] = getInvoicePDA(invoiceId);
 
-  // Parse invoice hash from hex string to byte array
-  const hashBytes = Array.from(Buffer.from(params.invoiceHash.replace("0x", ""), "hex"));
-  // Pad or trim to 32 bytes
-  while (hashBytes.length < 32) hashBytes.push(0);
-  const invoiceHash = hashBytes.slice(0, 32);
-
-  const [dedupPda] = getDedupPDA(invoiceHash);
   const employeePk = new PublicKey(params.employee);
   const timestamp = params.timestamp || Math.floor(Date.now() / 1000);
-  const [monthlySpendPda] = getMonthlySpendPDA(employeePk, timestamp);
 
-  // Build a DKIM domain hash (placeholder — 32 zero bytes for local testing)
+  // DKIM domain hash (32 zero bytes for local/fallback)
   const dkimDomainHash = Array.from(Buffer.alloc(32, 0));
+
+  // Compute invoice hash exactly as the on-chain program does:
+  // SHA256(vendor_bytes + amount_cents_le_u64 + timestamp_le_i64 + dkim_domain_hash)
+  const hashData = Buffer.concat([
+    Buffer.from(params.vendor),
+    (() => { const b = Buffer.alloc(8); b.writeBigUInt64LE(BigInt(params.amountCents)); return b; })(),
+    (() => { const b = Buffer.alloc(8); b.writeBigInt64LE(BigInt(timestamp)); return b; })(),
+    Buffer.from(dkimDomainHash),
+  ]);
+  const invoiceHash = Array.from(createHash("sha256").update(hashData).digest());
+
+  const [dedupPda] = getDedupPDA(invoiceHash);
+  const [monthlySpendPda] = getMonthlySpendPDA(employeePk, timestamp);
 
   const txHash = await program.methods
     .submitInvoice(
