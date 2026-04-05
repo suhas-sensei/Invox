@@ -111,7 +111,7 @@ function EmployeeContent() {
             onClick={handleGmailConnect}
             className="block w-full bg-black text-white font-medium py-3 px-6 rounded-xl hover:bg-black/90 transition-colors text-sm"
           >
-            Sign in with Google
+            Link your Gmail
           </button>
         </div>
       </div>
