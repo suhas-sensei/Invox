@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     // Already registered — for hackathon, we store preference and use it during payment
     // The contract's set_preferred_token requires the employee to be the caller
-    // So we store it server-side and pass it through to StarkZap during payment
+    // So we store it server-side and pass it through during payment
     return NextResponse.json({ success: true, action: "updated" });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed";

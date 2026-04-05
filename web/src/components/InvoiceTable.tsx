@@ -128,7 +128,7 @@ export function InvoiceTable({
                   )}
                   {inv.status === "paid" && inv.paymentTx && (
                     <a
-                      href={`https://sepolia.solscan.io/tx/${inv.paymentTx}`}
+                      href={`https://solscan.io/tx/${inv.paymentTx}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-400 hover:underline"

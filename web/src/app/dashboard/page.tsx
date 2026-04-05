@@ -7,7 +7,7 @@ import { useInvoices } from "@/hooks/useInvoices";
 import { WalletConnect } from "@/components/WalletConnect";
 import { ProofStatus } from "@/components/ProofStatus";
 import type { ProofStatusType } from "@/components/ProofStatus";
-import { SEPOLIA_TOKENS } from "@/lib/tokens";
+import { SOLANA_TOKENS } from "@/lib/tokens";
 
 interface ScannedEmail {
   messageId: string;
@@ -64,7 +64,7 @@ function DashboardContent() {
   const [proofStates, setProofStates] = useState<Record<string, ProofStatusType>>({});
   const [proofData, setProofData] = useState<Record<string, { invoiceHash: string; txHash: string; vendor: string; amountCents: number; timestamp: number; proofVerified: boolean }>>({});
   const [viewingProof, setViewingProof] = useState<string | null>(null);
-  const [preferredToken, setPreferredToken] = useState<string>(SEPOLIA_TOKENS.SOL);
+  const [preferredToken, setPreferredToken] = useState<string>(SOLANA_TOKENS.SOL);
   const [copied, setCopied] = useState(false);
   const [receipts, setReceipts] = useState<Array<{ tokenId: number; invoiceId: number; vendor: string; amountCents: number; paymentTx: string; timestamp: number }>>([]);
   const [walletBalance, setWalletBalance] = useState<{ strk: string; eth: string }>({ strk: "0", eth: "0" });
@@ -241,7 +241,7 @@ function DashboardContent() {
                   <p className="text-xs text-white/70 uppercase tracking-wider">Receive in</p>
                   <button
                     onClick={async () => {
-                      const tokens: string[] = [SEPOLIA_TOKENS.SOL, SEPOLIA_TOKENS.USDC, SEPOLIA_TOKENS.USDT];
+                      const tokens: string[] = [SOLANA_TOKENS.SOL, SOLANA_TOKENS.USDC, SOLANA_TOKENS.USDT];
                       const idx = tokens.indexOf(preferredToken);
                       const next = tokens[(idx + 1) % tokens.length];
                       setPreferredToken(next);
@@ -256,7 +256,7 @@ function DashboardContent() {
                     }}
                     className="text-sm font-bold text-white hover:text-white/70 transition-colors"
                   >
-                    {{ [SEPOLIA_TOKENS.SOL]: "SOL", [SEPOLIA_TOKENS.USDC]: "USDC", [SEPOLIA_TOKENS.USDT]: "USDT" }[preferredToken] || "SOL"}
+                    {{ [SOLANA_TOKENS.SOL]: "SOL", [SOLANA_TOKENS.USDC]: "USDC", [SOLANA_TOKENS.USDT]: "USDT" }[preferredToken] || "SOL"}
                   </button>
                 </div>
               </div>
@@ -347,7 +347,7 @@ function DashboardContent() {
                     }`}>{inv.status === "auto_approved" ? "auto" : inv.status}</span>
                     <p className="text-sm font-bold text-black w-20 text-right">${(inv.amountCents / 100).toFixed(2)}</p>
                     {inv.paymentTx && (
-                      <a href={`https://sepolia.solscan.io/tx/${inv.paymentTx}`} target="_blank" rel="noopener noreferrer"
+                      <a href={`https://solscan.io/tx/${inv.paymentTx}`} target="_blank" rel="noopener noreferrer"
                         className="ml-3 text-xs text-black/40 hover:text-black">View Tx →</a>
                     )}
                     {inv.status === "paid" && (
@@ -373,7 +373,7 @@ function DashboardContent() {
                       <p className="text-lg font-black text-black mt-1">${(r.amountCents / 100).toFixed(2)}</p>
                       <p className="text-[10px] text-black/30 mt-2">{new Date(r.timestamp * 1000).toLocaleDateString()}</p>
                       <a
-                        href={`https://sepolia.solscan.io/tx/${r.paymentTx}`}
+                        href={`https://solscan.io/tx/${r.paymentTx}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[10px] text-black/40 hover:text-black mt-1 block"
@@ -449,7 +449,7 @@ function DashboardContent() {
               </div>
               <div>
                 <p className="text-xs text-black/40 uppercase tracking-wider mb-1">On-Chain Transaction</p>
-                <a href={`https://sepolia.solscan.io/tx/${proofData[viewingProof].txHash}`} target="_blank" rel="noopener noreferrer"
+                <a href={`https://solscan.io/tx/${proofData[viewingProof].txHash}`} target="_blank" rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:underline font-mono bg-black/5 rounded px-3 py-2 break-all block">
                   {proofData[viewingProof].txHash}
                 </a>
@@ -470,9 +470,9 @@ function DashboardContent() {
               </div>
             </div>
             <div className="mt-6 flex gap-3">
-              <a href={`https://sepolia.solscan.io/tx/${proofData[viewingProof].txHash}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://solscan.io/tx/${proofData[viewingProof].txHash}`} target="_blank" rel="noopener noreferrer"
                 className="flex-1 bg-black text-white text-sm font-medium py-2.5 rounded-lg text-center hover:bg-black/90 transition-colors">
-                View on Voyager
+                View on Solscan
               </a>
               <button onClick={() => setViewingProof(null)} className="flex-1 border border-black/10 text-black text-sm font-medium py-2.5 rounded-lg hover:bg-black/5 transition-colors">
                 Close

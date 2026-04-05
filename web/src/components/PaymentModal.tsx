@@ -126,7 +126,7 @@ export function PaymentModal({
               <>
                 Payment sent!{" "}
                 <a
-                  href={`https://sepolia.solscan.io/tx/${result.paymentTx}`}
+                  href={`https://solscan.io/tx/${result.paymentTx}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"

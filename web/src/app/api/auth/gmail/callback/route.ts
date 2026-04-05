@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
 
   if (!code) {
     return NextResponse.redirect(
-      new URL("/employee?error=no_code", request.url)
+      new URL("/dashboard?error=no_code", request.url)
     );
   }
 

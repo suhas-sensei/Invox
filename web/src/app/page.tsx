@@ -318,15 +318,15 @@ export default function Home() {
                           <span className="text-xs text-black/40 block mb-4">[REF: ZV20260402]</span>
                           <span className="flex gap-4 items-start">
                             <span className="flex-1">
-                              <span className="text-sm font-medium text-black block mb-2">[STARKNET TRANSFER]</span>
+                              <span className="text-sm font-medium text-black block mb-2">[SOLANA TRANSFER]</span>
                               <span className="text-xs text-black/50 block mb-1">[WALLET ADDRESS]</span>
-                              <span className="text-xs text-black/50 block mb-1 font-mono">0x7dcf...0803</span>
-                              <span className="text-xs text-black/50 block mb-4">[NETWORK: SEPOLIA]</span>
-                              <span className="text-xs text-black/50 block mb-1">[TOKEN: USDC / SOL / ETH]</span>
-                              <span className="text-xs text-black/50 block">[TERMS: INSTANT VIA STARKZAP]</span>
+                              <span className="text-xs text-black/50 block mb-1 font-mono">6uLK...BxPt</span>
+                              <span className="text-xs text-black/50 block mb-4">[NETWORK: DEVNET]</span>
+                              <span className="text-xs text-black/50 block mb-1">[TOKEN: USDC / SOL / USDT]</span>
+                              <span className="text-xs text-black/50 block">[TERMS: INSTANT VIA MAGICBLOCK]</span>
                             </span>
                             <span className="flex flex-col items-center">
-                              <QRCodeSVG value="0x0660A457deD82CF20f49CB43f7EA6d2E9A058e046D06FB68efd88e9490F187dE" size={80} level="L" />
+                              <QRCodeSVG value="6uLKRRtbkCoNSk5k1YDUW8BwqAWQfYaSf3xJ79EiBxPt" size={80} level="L" />
                               <span className="text-[9px] text-black/30 mt-1">SCAN QR TO PAY</span>
                             </span>
                           </span>
@@ -339,10 +339,10 @@ export default function Home() {
                         </span>
                       </span>
                       <span className="flex justify-between items-end mt-8 pt-4 border-t border-black/10 text-[10px] text-black/30">
-                        <span>[ZVOICE]<br />[STARKNET SEPOLIA]</span>
-                        <span>[POWERED BY STARKZAP]</span>
+                        <span>[INVOX]<br />[SOLANA DEVNET]</span>
+                        <span>[POWERED BY MAGICBLOCK]</span>
                         <span>[ZK-EMAIL VERIFIED]</span>
-                        <span>[CAIRO SMART CONTRACTS]</span>
+                        <span>[ANCHOR SMART CONTRACTS]</span>
                       </span>
                     </span>
                   )}
