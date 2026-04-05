@@ -3,6 +3,7 @@ import { scanForInvoices } from "@/lib/gmail";
 
 export async function POST(request: NextRequest) {
   const refreshToken = request.cookies.get("gmail_refresh_token")?.value;
+  console.log("[SCAN] refresh token present:", !!refreshToken, "length:", refreshToken?.length);
 
   if (!refreshToken) {
     return NextResponse.json(

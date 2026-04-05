@@ -31,30 +31,81 @@ export async function getTokensFromCode(
 }
 
 const VENDOR_QUERIES = [
-  "from:noreply@email.amazonses.com subject:invoice",
-  "from:billing@figma.com subject:receipt",
-  "from:billing@stripe.com subject:receipt",
-  "from:noreply@github.com subject:receipt",
-  "from:billing@notion.so subject:invoice",
-  "from:noreply@slack.com subject:invoice",
+  // Specific vendor billing addresses
   "from:invoices@vercel.com",
+  "from:billing@stripe.com subject:(receipt OR invoice)",
+  "from:billing@notion.so subject:(receipt OR invoice)",
+  "from:billing@figma.com subject:(receipt OR invoice)",
+  "from:noreply@github.com subject:(receipt OR invoice)",
+  "from:noreply@slack.com subject:(receipt OR invoice)",
+  "from:noreply@email.amazonses.com subject:invoice",
+  "from:billing@openai.com subject:(receipt OR invoice OR payment)",
+  "from:billing@anthropic.com",
+  "from:billing@cloudflare.com",
+  "from:billing@digitalocean.com",
+  "from:billing@linear.app",
+  "from:billing@supabase.io OR from:billing@supabase.com",
+  "from:billing@render.com",
+  "from:billing@railway.app",
+  "from:billing@fly.io",
+  "from:billing@shopify.com",
+  "from:billing@twilio.com",
+  "from:billing@datadog.com",
+  "from:billing@sentry.io",
+  "from:billing@zoom.us",
+  "from:billing@atlassian.com",
+  "from:billing@mongodb.com",
+  "from:billing@1password.com",
+  "from:billing@dropbox.com",
+  "from:noreply@canva.com subject:(receipt OR invoice)",
+  "from:receipts@x.com subject:(receipt OR invoice)",
+  // Catch-all: any email with invoice/receipt AND an attachment (real invoices)
   "subject:invoice has:attachment",
   "subject:receipt has:attachment",
+  "subject:payment receipt",
 ];
 
 export function extractVendorDomain(from: string): string {
   const match = from.match(/@([a-zA-Z0-9.-]+)/);
   if (!match) return "unknown";
   const domain = match[1].toLowerCase();
-  // Normalize known vendor domains
-  if (domain.includes("amazonses") || domain.includes("amazon"))
-    return "aws.amazon.com";
-  if (domain.includes("figma")) return "figma.com";
-  if (domain.includes("stripe")) return "stripe.com";
-  if (domain.includes("github")) return "github.com";
-  if (domain.includes("notion")) return "notion.so";
-  if (domain.includes("slack")) return "slack.com";
-  if (domain.includes("vercel")) return "vercel.com";
+  const map: Record<string, string> = {
+    amazonses: "aws.amazon.com",
+    amazon: "aws.amazon.com",
+    figma: "figma.com",
+    stripe: "stripe.com",
+    github: "github.com",
+    notion: "notion.so",
+    slack: "slack.com",
+    vercel: "vercel.com",
+    google: "google.com",
+    cloudflare: "cloudflare.com",
+    digitalocean: "digitalocean.com",
+    linear: "linear.app",
+    supabase: "supabase.com",
+    netlify: "netlify.com",
+    render: "render.com",
+    railway: "railway.app",
+    fly: "fly.io",
+    heroku: "heroku.com",
+    openai: "openai.com",
+    anthropic: "anthropic.com",
+    mongodb: "mongodb.com",
+    atlassian: "atlassian.com",
+    zoom: "zoom.us",
+    "1password": "1password.com",
+    dropbox: "dropbox.com",
+    canva: "canva.com",
+    shopify: "shopify.com",
+    twilio: "twilio.com",
+    sendgrid: "sendgrid.com",
+    datadog: "datadog.com",
+    sentry: "sentry.io",
+    x: "x.com",
+  };
+  for (const [key, value] of Object.entries(map)) {
+    if (domain.includes(key)) return value;
+  }
   return domain;
 }
 
@@ -95,8 +146,10 @@ export async function scanForInvoices(
       const list = await gmail.users.messages.list({
         userId: "me",
         q: query,
-        maxResults: 5,
+        maxResults: 10,
       });
+
+      console.log(`[SCAN] query="${query}" found ${list.data.messages?.length ?? 0} messages`);
 
       for (const msg of list.data.messages || []) {
         if (!msg.id || seenIds.has(msg.id)) continue;
@@ -115,9 +168,11 @@ export async function scanForInvoices(
           const parsed = await simpleParser(raw);
 
           const vendor = extractVendorDomain(parsed.from?.text || "");
-          const textContent = parsed.text || "";
-          const amountCents = extractAmount(textContent);
+          // Try plain text first, fall back to stripped HTML
+          const textContent = parsed.text || (parsed.html ? parsed.html.replace(/<[^>]+>/g, " ") : "");
+          const amountCents = extractAmount(textContent) || extractAmount(parsed.subject || "");
 
+          console.log(`[SCAN] email: vendor=${vendor} amount=${amountCents} subject="${parsed.subject?.slice(0, 60)}"`);
           if (amountCents > 0) {
             results.push({
               messageId: msg.id,
