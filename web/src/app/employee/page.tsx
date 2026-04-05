@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import CipherText from "@/components/CipherText";
 
@@ -69,14 +69,18 @@ function EmployeeContent() {
     return <div className="min-h-screen bg-[#fafafa] flex items-center justify-center text-black/30">Redirecting to dashboard...</div>;
   }
 
+  const [connecting, setConnecting] = useState(false);
+
   const handleGmailConnect = async () => {
+    setConnecting(true);
     try {
       const res = await fetch("/api/auth/gmail");
       const data = await res.json();
       if (data.authUrl) window.location.href = data.authUrl;
-      else alert(data.error || "Failed to connect Gmail");
+      else { alert(data.error || "Failed to connect Gmail"); setConnecting(false); }
     } catch {
       alert("Failed to connect");
+      setConnecting(false);
     }
   };
 
@@ -90,7 +94,7 @@ function EmployeeContent() {
         {positions.map((pos, i) => {
           const cardX = pos.left ? Number(String(pos.left).replace("%", "")) + 8 : 100 - Number(String(pos.right).replace("%", "")) - 8;
           const cardY = pos.top ? Number(String(pos.top).replace("%", "")) + 8 : 100 - Number(String(pos.bottom).replace("%", "")) - 8;
-          return <line key={i} x1="50" y1="50" x2={cardX} y2={cardY} stroke="#e0e0e0" strokeWidth="0.15" strokeDasharray="1 0.7" />;
+          return <line key={i} x1="50" y1="50" x2={cardX} y2={cardY} stroke="#e0e0e0" strokeWidth="0.15" strokeDasharray="1 0.7" className="animate-pulse" style={{ animationDelay: `${i * 0.3}s` }} />;
         })}
       </svg>
 
@@ -109,9 +113,15 @@ function EmployeeContent() {
           </p>
           <button
             onClick={handleGmailConnect}
-            className="block w-full bg-black text-white font-medium py-3 px-6 rounded-xl hover:bg-black/90 transition-colors text-sm"
+            disabled={connecting}
+            className="block w-full bg-black text-white font-medium py-3 px-6 rounded-xl hover:bg-black/90 disabled:bg-black/50 transition-colors text-sm"
           >
-            Link your Gmail
+            {connecting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                Connecting...
+              </span>
+            ) : "Link your Gmail"}
           </button>
         </div>
       </div>
