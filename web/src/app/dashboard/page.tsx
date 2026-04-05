@@ -67,28 +67,35 @@ function DashboardContent() {
   const [preferredToken, setPreferredToken] = useState<string>(SOLANA_TOKENS.SOL);
   const [copied, setCopied] = useState(false);
   const [receipts, setReceipts] = useState<Array<{ tokenId: number; invoiceId: number; vendor: string; amountCents: number; paymentTx: string; timestamp: number }>>([]);
-  const [walletBalance, setWalletBalance] = useState<{ strk: string; eth: string }>({ strk: "0", eth: "0" });
+  const [walletBalance, setWalletBalance] = useState<{ strk: string; usd: string }>({ strk: "0", usd: "0" });
 
   const navIcons = ["⌂", "✉", "▤", "◉", "⊕", "⚙"];
 
-  // Fetch wallet balance from Solana
+  // Fetch wallet balance from Solana + SOL price
   useEffect(() => {
     if (!address) return;
     const fetchBalance = async () => {
       try {
         const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || "http://localhost:8899";
-        const res = await fetch(rpcUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0", method: "getBalance", id: 1,
-            params: [address]
+        const [balRes, priceRes] = await Promise.all([
+          fetch(rpcUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jsonrpc: "2.0", method: "getBalance", id: 1, params: [address] }),
           }),
-        });
-        const data = await res.json();
-        const lamports = data.result?.value ?? 0;
-        const sol = (lamports / 1e9).toFixed(4);
-        setWalletBalance({ strk: sol, eth: "0" });
+          fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd").catch(() => null),
+        ]);
+        const balData = await balRes.json();
+        const lamports = balData.result?.value ?? 0;
+        const solNum = lamports / 1e9;
+        const sol = solNum.toFixed(4);
+        let usd = "0.00";
+        if (priceRes && priceRes.ok) {
+          const priceData = await priceRes.json();
+          const solPrice = priceData?.solana?.usd ?? 0;
+          usd = (solNum * solPrice).toFixed(2);
+        }
+        setWalletBalance({ strk: sol, usd });
       } catch { /* ignore */ }
     };
     fetchBalance();
@@ -267,10 +274,14 @@ function DashboardContent() {
                 <p className="text-sm text-black/40 mb-5">{invoices.filter(i => i.status === "pending" || i.status === "auto_approved").length} invoices awaiting payment</p>
 
                 <p className="text-base font-medium text-black/40 mb-2">Wallet Balance</p>
-                <div className="flex gap-6">
+                <div className="flex gap-6 items-end">
                   <div>
                     <p className="text-2xl font-black text-black">{walletBalance.strk}</p>
                     <p className="text-xs text-black/30">SOL</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-black/50">${walletBalance.usd}</p>
+                    <p className="text-xs text-black/30">USD</p>
                   </div>
                 </div>
               </div>

@@ -51,6 +51,17 @@ export async function POST(req: Request) {
       ephemeral: boolean;
     }> = [];
 
+    // Get SOL price for USD → lamports conversion
+    let solPrice = 130;
+    try {
+      const priceRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+      if (priceRes.ok) {
+        const priceData = await priceRes.json();
+        solPrice = priceData?.solana?.usd ?? 130;
+      }
+    } catch { /* use fallback */ }
+    const centsToLamports = (cents: number) => Math.round((cents / 100 / solPrice) * 1e9);
+
     // Try Ephemeral Rollup for batch processing
     const useER = await isEphemeralAvailable();
 
@@ -88,7 +99,7 @@ export async function POST(req: Request) {
           // Pay via MagicBlock Private Payments
           const { txHash: paymentTx } = await payEmployee({
             employeeAddress: inv.employee,
-            amountLamports: inv.amountCents * 10000,
+            amountLamports: centsToLamports(inv.amountCents),
           });
 
           // Mark paid on-chain
@@ -129,7 +140,7 @@ export async function POST(req: Request) {
       for (const inv of toPay) {
         const { txHash: paymentTx } = await payEmployee({
           employeeAddress: inv.employee,
-          amountLamports: inv.amountCents * 10000,
+          amountLamports: centsToLamports(inv.amountCents),
         });
 
         await markPaidOnChain(inv.id, paymentTx);

@@ -39,10 +39,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Pay employee via MagicBlock Private Payments
+    // Convert USD cents to lamports using live SOL price
     const amount = amountCents || invoice?.amountCents || 0;
+    let solPrice = 130; // fallback
+    try {
+      const priceRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+      if (priceRes.ok) {
+        const priceData = await priceRes.json();
+        solPrice = priceData?.solana?.usd ?? 130;
+      }
+    } catch { /* use fallback */ }
+    const usdAmount = amount / 100; // cents to dollars
+    const solAmount = usdAmount / solPrice;
+    const lamports = Math.round(solAmount * 1e9);
+
     const { txHash: paymentTx } = await payEmployee({
       employeeAddress: employeeAddress || invoice?.employee || "",
-      amountLamports: amount * 10000,
+      amountLamports: lamports,
       tokenMint: tokenToUse,
     });
 
