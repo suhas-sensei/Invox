@@ -94,7 +94,11 @@ function EmployeeContent() {
         {positions.map((pos, i) => {
           const cardX = pos.left ? Number(String(pos.left).replace("%", "")) + 8 : 100 - Number(String(pos.right).replace("%", "")) - 8;
           const cardY = pos.top ? Number(String(pos.top).replace("%", "")) + 8 : 100 - Number(String(pos.bottom).replace("%", "")) - 8;
-          return <line key={i} x1="50" y1="50" x2={cardX} y2={cardY} stroke="#e0e0e0" strokeWidth="0.15" strokeDasharray="1 0.7" className="animate-pulse" style={{ animationDelay: `${i * 0.3}s` }} />;
+          const length = Math.sqrt((cardX - 50) ** 2 + (cardY - 50) ** 2);
+          return (
+            <line key={i} x1="50" y1="50" x2={cardX} y2={cardY} stroke="#c0c0c0" strokeWidth="0.15" strokeDasharray="1 0.7"
+              style={{ strokeDashoffset: 0, animation: `dashFlow ${2 + i * 0.4}s linear infinite` }} />
+          );
         })}
       </svg>
 
@@ -158,6 +162,10 @@ function EmployeeContent() {
         @keyframes cardFloat {
           from { opacity: 0; transform: translateY(15px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes dashFlow {
+          from { stroke-dashoffset: 0; }
+          to { stroke-dashoffset: -10; }
         }
       `}</style>
     </div>
