@@ -347,7 +347,7 @@ function DashboardContent() {
                     }`}>{inv.status === "auto_approved" ? "auto" : inv.status}</span>
                     <p className="text-sm font-bold text-black w-20 text-right">${(inv.amountCents / 100).toFixed(2)}</p>
                     {inv.paymentTx && (
-                      <a href={`https://solscan.io/tx/${inv.paymentTx}`} target="_blank" rel="noopener noreferrer"
+                      <a href={`https://solscan.io/tx/${inv.paymentTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer"
                         className="ml-3 text-xs text-black/40 hover:text-black">View Tx →</a>
                     )}
                     {inv.status === "paid" && (
@@ -373,7 +373,7 @@ function DashboardContent() {
                       <p className="text-lg font-black text-black mt-1">${(r.amountCents / 100).toFixed(2)}</p>
                       <p className="text-[10px] text-black/30 mt-2">{new Date(r.timestamp * 1000).toLocaleDateString()}</p>
                       <a
-                        href={`https://solscan.io/tx/${r.paymentTx}`}
+                        href={`https://solscan.io/tx/${r.paymentTx}?cluster=devnet`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[10px] text-black/40 hover:text-black mt-1 block"
@@ -449,7 +449,7 @@ function DashboardContent() {
               </div>
               <div>
                 <p className="text-xs text-black/40 uppercase tracking-wider mb-1">On-Chain Transaction</p>
-                <a href={`https://solscan.io/tx/${proofData[viewingProof].txHash}`} target="_blank" rel="noopener noreferrer"
+                <a href={`https://solscan.io/tx/${proofData[viewingProof].txHash}?cluster=devnet`} target="_blank" rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:underline font-mono bg-black/5 rounded px-3 py-2 break-all block">
                   {proofData[viewingProof].txHash}
                 </a>
@@ -470,7 +470,7 @@ function DashboardContent() {
               </div>
             </div>
             <div className="mt-6 flex gap-3">
-              <a href={`https://solscan.io/tx/${proofData[viewingProof].txHash}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://solscan.io/tx/${proofData[viewingProof].txHash}?cluster=devnet`} target="_blank" rel="noopener noreferrer"
                 className="flex-1 bg-black text-white text-sm font-medium py-2.5 rounded-lg text-center hover:bg-black/90 transition-colors">
                 View on Solscan
               </a>
