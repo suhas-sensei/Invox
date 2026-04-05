@@ -48,6 +48,10 @@ export interface PaymentResult {
 }
 
 function loadAdminKeypair(): Keypair {
+  const kpJson = process.env.ADMIN_KEYPAIR_JSON;
+  if (kpJson) {
+    return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(kpJson)));
+  }
   const kpPath =
     process.env.ADMIN_KEYPAIR_PATH ||
     `${process.env.HOME}/.config/solana/id.json`;
