@@ -1,0 +1,693 @@
+{
+  "address": "51fkQxX7Sce6L3M9vbrHoDppo7oLjLES63Yq5C7Z6qx2",
+  "metadata": {
+    "name": "invoice_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "approve_invoice",
+      "discriminator": [
+        99,
+        251,
+        216,
+        24,
+        154,
+        185,
+        131,
+        126
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "invoice",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "batch_approve",
+      "discriminator": [
+        225,
+        132,
+        148,
+        68,
+        137,
+        116,
+        171,
+        149
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "invoice",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "auto_approve_threshold",
+          "type": "u64"
+        },
+        {
+          "name": "monthly_cap",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "mark_paid",
+      "docs": [
+        "Combined pay instruction:",
+        "1. Check invoice is approved/auto-approved",
+        "2. Mark paid with payment tx signature"
+      ],
+      "discriminator": [
+        51,
+        120,
+        9,
+        160,
+        70,
+        29,
+        18,
+        205
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "invoice",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "payment_tx",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "reject_invoice",
+      "discriminator": [
+        10,
+        33,
+        176,
+        200,
+        217,
+        237,
+        166,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "invoice",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_auto_approve_threshold",
+      "discriminator": [
+        194,
+        248,
+        178,
+        155,
+        86,
+        80,
+        120,
+        32
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "set_monthly_cap",
+      "discriminator": [
+        88,
+        128,
+        41,
+        110,
+        55,
+        30,
+        160,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "state"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "submit_invoice",
+      "docs": [
+        "Submit invoice with on-chain validation:",
+        "1. Verify proof hash on-chain (recompute SHA256)",
+        "2. Check dedup (PDA-based — if account init fails, it's a duplicate)",
+        "3. Check monthly cap",
+        "4. Auto-approve if under threshold"
+      ],
+      "discriminator": [
+        95,
+        35,
+        66,
+        193,
+        130,
+        108,
+        39,
+        144
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "invoice",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  118,
+                  111,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "state.invoice_count",
+                "account": "RegistryState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dedup",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  100,
+                  117,
+                  112
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "invoice_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "monthly_spend",
+          "writable": true
+        },
+        {
+          "name": "employee"
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "invoice_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "vendor",
+          "type": "string"
+        },
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        },
+        {
+          "name": "timestamp",
+          "type": "i64"
+        },
+        {
+          "name": "dkim_domain_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "DedupRecord",
+      "discriminator": [
+        80,
+        237,
+        45,
+        67,
+        196,
+        87,
+        192,
+        75
+      ]
+    },
+    {
+      "name": "Invoice",
+      "discriminator": [
+        51,
+        194,
+        250,
+        114,
+        6,
+        104,
+        18,
+        164
+      ]
+    },
+    {
+      "name": "MonthlySpend",
+      "discriminator": [
+        163,
+        34,
+        36,
+        70,
+        2,
+        105,
+        49,
+        228
+      ]
+    },
+    {
+      "name": "RegistryState",
+      "discriminator": [
+        29,
+        34,
+        224,
+        195,
+        175,
+        183,
+        99,
+        97
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NotPending",
+      "msg": "Invoice not pending"
+    },
+    {
+      "code": 6001,
+      "name": "NotApproved",
+      "msg": "Invoice not approved"
+    },
+    {
+      "code": 6002,
+      "name": "Duplicate",
+      "msg": "Duplicate invoice (hash already submitted)"
+    },
+    {
+      "code": 6003,
+      "name": "CapExceeded",
+      "msg": "Monthly spending cap exceeded"
+    },
+    {
+      "code": 6004,
+      "name": "ProofInvalid",
+      "msg": "Proof verification failed — on-chain hash recomputation mismatch"
+    }
+  ],
+  "types": [
+    {
+      "name": "DedupRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "invoice_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "used",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Invoice",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "invoice_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "employee",
+            "type": "pubkey"
+          },
+          {
+            "name": "vendor",
+            "type": "string"
+          },
+          {
+            "name": "amount_cents",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "proof_verified",
+            "type": "bool"
+          },
+          {
+            "name": "payment_tx",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MonthlySpend",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "employee",
+            "type": "pubkey"
+          },
+          {
+            "name": "month",
+            "type": "u16"
+          },
+          {
+            "name": "total_cents",
+            "type": "u64"
+          },
+          {
+            "name": "invoice_count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegistryState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "relayer",
+            "type": "pubkey"
+          },
+          {
+            "name": "invoice_count",
+            "type": "u64"
+          },
+          {
+            "name": "auto_approve_threshold",
+            "type": "u64"
+          },
+          {
+            "name": "monthly_cap",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

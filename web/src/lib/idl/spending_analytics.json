@@ -1,0 +1,288 @@
+{
+  "address": "GmBdHPG8SqkPQJ57p3JpRq1GzMkwF8mUfo74qCdLGneD",
+  "metadata": {
+    "name": "spending_analytics",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "analytics",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  110,
+                  97,
+                  108,
+                  121,
+                  116,
+                  105,
+                  99,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "record_approval",
+      "discriminator": [
+        217,
+        89,
+        44,
+        9,
+        110,
+        57,
+        100,
+        240
+      ],
+      "accounts": [
+        {
+          "name": "analytics",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  110,
+                  97,
+                  108,
+                  121,
+                  116,
+                  105,
+                  99,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "record_payment",
+      "discriminator": [
+        226,
+        154,
+        10,
+        27,
+        9,
+        14,
+        148,
+        137
+      ],
+      "accounts": [
+        {
+          "name": "analytics",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  110,
+                  97,
+                  108,
+                  121,
+                  116,
+                  105,
+                  99,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "record_rejection",
+      "discriminator": [
+        226,
+        33,
+        91,
+        67,
+        148,
+        122,
+        96,
+        132
+      ],
+      "accounts": [
+        {
+          "name": "analytics",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  110,
+                  97,
+                  108,
+                  121,
+                  116,
+                  105,
+                  99,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "record_submission",
+      "discriminator": [
+        241,
+        159,
+        132,
+        217,
+        196,
+        63,
+        96,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "analytics",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  110,
+                  97,
+                  108,
+                  121,
+                  116,
+                  105,
+                  99,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Analytics",
+      "discriminator": [
+        135,
+        28,
+        189,
+        27,
+        51,
+        143,
+        253,
+        88
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "Analytics",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "total_submitted",
+            "type": "u64"
+          },
+          {
+            "name": "total_approved",
+            "type": "u64"
+          },
+          {
+            "name": "total_paid",
+            "type": "u64"
+          },
+          {
+            "name": "total_rejected",
+            "type": "u64"
+          },
+          {
+            "name": "total_amount_submitted",
+            "type": "u64"
+          },
+          {
+            "name": "total_amount_paid",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

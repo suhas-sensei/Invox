@@ -1,0 +1,167 @@
+{
+  "address": "FErGeseBj3u79FUhFS7ZeDFByy3m9Yqh3BoDjXhNAUMu",
+  "metadata": {
+    "name": "employee_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "register_employee",
+      "discriminator": [
+        234,
+        170,
+        133,
+        49,
+        154,
+        125,
+        86,
+        161
+      ],
+      "accounts": [
+        {
+          "name": "employee_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  109,
+                  112,
+                  108,
+                  111,
+                  121,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "employee"
+              }
+            ]
+          }
+        },
+        {
+          "name": "employee"
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "preferred_token",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "set_preferred_token",
+      "discriminator": [
+        94,
+        76,
+        154,
+        166,
+        145,
+        30,
+        141,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "employee_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  109,
+                  112,
+                  108,
+                  111,
+                  121,
+                  101,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "employee"
+              }
+            ]
+          }
+        },
+        {
+          "name": "employee",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "token",
+          "type": "pubkey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "EmployeeRecord",
+      "discriminator": [
+        137,
+        106,
+        233,
+        41,
+        166,
+        225,
+        188,
+        98
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "EmployeeRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "employee",
+            "type": "pubkey"
+          },
+          {
+            "name": "preferred_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "registered",
+            "type": "bool"
+          },
+          {
+            "name": "total_reimbursed",
+            "type": "u64"
+          },
+          {
+            "name": "invoice_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

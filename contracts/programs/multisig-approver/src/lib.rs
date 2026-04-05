@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("6wwGHtUjCVWqjH7UBg7YhUV5dVdPhRT9axCa7iQM8p73");
+declare_id!("AqUT256tsQkFHz1aunEfYhoLSPwWLX2wmNPrBVk6uq8X");
 
 #[program]
 pub mod multisig_approver {

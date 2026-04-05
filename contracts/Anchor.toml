@@ -5,25 +5,25 @@ package_manager = "yarn"
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-invoice_registry = "9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo"
-employee_registry = "FJoYF2xDCeCkaFxEL7gXuavy6cWJ3mbtzwsock1h73bo"
-treasury = "5G17KZKSoRdMhzqGg95uHH8skPbppJZFmtSMEiMSnWwC"
-vendor_registry = "9x3wUkmGKZNDuK5qtNjgdBCbUZKfaQ2SNs1g4DPU6AEp"
-multisig_approver = "6wwGHtUjCVWqjH7UBg7YhUV5dVdPhRT9axCa7iQM8p73"
-reimbursement_nft = "BN6ry1pAjXhibJNS4h8Fseqi8KTge6dmkxTAnnoc71Ng"
-spending_analytics = "6rxb4Zmjaw9QF7a9CsFsQPCWqAQ6roiuW9BBg2fAgYSn"
-proof_verifier = "JCPDvoeEH4Qt1DW1CrvjbXu4akrw6APKBGr6H73cmbgU"
-
 [programs.devnet]
-invoice_registry = "9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo"
 employee_registry = "FJoYF2xDCeCkaFxEL7gXuavy6cWJ3mbtzwsock1h73bo"
-treasury = "5G17KZKSoRdMhzqGg95uHH8skPbppJZFmtSMEiMSnWwC"
-vendor_registry = "9x3wUkmGKZNDuK5qtNjgdBCbUZKfaQ2SNs1g4DPU6AEp"
+invoice_registry = "9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo"
 multisig_approver = "6wwGHtUjCVWqjH7UBg7YhUV5dVdPhRT9axCa7iQM8p73"
+proof_verifier = "JCPDvoeEH4Qt1DW1CrvjbXu4akrw6APKBGr6H73cmbgU"
 reimbursement_nft = "BN6ry1pAjXhibJNS4h8Fseqi8KTge6dmkxTAnnoc71Ng"
 spending_analytics = "6rxb4Zmjaw9QF7a9CsFsQPCWqAQ6roiuW9BBg2fAgYSn"
-proof_verifier = "JCPDvoeEH4Qt1DW1CrvjbXu4akrw6APKBGr6H73cmbgU"
+treasury = "5G17KZKSoRdMhzqGg95uHH8skPbppJZFmtSMEiMSnWwC"
+vendor_registry = "9x3wUkmGKZNDuK5qtNjgdBCbUZKfaQ2SNs1g4DPU6AEp"
+
+[programs.localnet]
+employee_registry = "FErGeseBj3u79FUhFS7ZeDFByy3m9Yqh3BoDjXhNAUMu"
+invoice_registry = "51fkQxX7Sce6L3M9vbrHoDppo7oLjLES63Yq5C7Z6qx2"
+multisig_approver = "AqUT256tsQkFHz1aunEfYhoLSPwWLX2wmNPrBVk6uq8X"
+proof_verifier = "5HoMpmNPb6qsGAHwUMFRBheRtVgMZQVmkjRSurbpeHy3"
+reimbursement_nft = "2Q2CHrNbzz5U4RDXHmKhkMcQCapBebZ5AAqkC1RtpUEJ"
+spending_analytics = "GmBdHPG8SqkPQJ57p3JpRq1GzMkwF8mUfo74qCdLGneD"
+treasury = "H4nwxmWmhwDRkynP3NWSP3r7194QDjb8wa5WYTo6P2ww"
+vendor_registry = "Cfi1HFakeABZCDo6CM282UdyYqUrsXQNgU5G4BsLwfpn"
 
 [registry]
 url = "https://api.apr.dev"

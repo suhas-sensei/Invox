@@ -71,30 +71,24 @@ function DashboardContent() {
 
   const navIcons = ["⌂", "✉", "▤", "◉", "⊕", "⚙"];
 
-  // Fetch wallet balance
+  // Fetch wallet balance from Solana
   useEffect(() => {
     if (!address) return;
     const fetchBalance = async () => {
       try {
-        const SOL_ADDR = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
-        const ETH_ADDR = "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-        const rpc = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_8/demo";
-
-        const call = async (token: string) => {
-          const res = await fetch(rpc, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              jsonrpc: "2.0", method: "starknet_call", id: 1,
-              params: { request: { contract_address: token, entry_point_selector: "0x2e4263afad30923c891518314c3c95dbe830a16874e8abc5777a9a20b54c76e", calldata: [address] }, block_id: "latest" }
-            }),
-          });
-          const data = await res.json();
-          return data.result?.[0] ? (Number(BigInt(data.result[0])) / 1e18).toFixed(4) : "0";
-        };
-
-        const [strk, eth] = await Promise.all([call(SOL_ADDR), call(ETH_ADDR)]);
-        setWalletBalance({ strk, eth });
+        const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || "http://localhost:8899";
+        const res = await fetch(rpcUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0", method: "getBalance", id: 1,
+            params: [address]
+          }),
+        });
+        const data = await res.json();
+        const lamports = data.result?.value ?? 0;
+        const sol = (lamports / 1e9).toFixed(4);
+        setWalletBalance({ strk: sol, eth: "0" });
       } catch { /* ignore */ }
     };
     fetchBalance();
@@ -277,10 +271,6 @@ function DashboardContent() {
                   <div>
                     <p className="text-2xl font-black text-black">{walletBalance.strk}</p>
                     <p className="text-xs text-black/30">SOL</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-black text-black">{walletBalance.eth}</p>
-                    <p className="text-xs text-black/30">ETH</p>
                   </div>
                 </div>
               </div>

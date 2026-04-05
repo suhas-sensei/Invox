@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use solana_sha256_hasher::hash;
 
-declare_id!("9Zwa4Gps5uKjxEfUefLCa9ohf4aFzNgQuxRtA1fwvcLo");
+declare_id!("51fkQxX7Sce6L3M9vbrHoDppo7oLjLES63Yq5C7Z6qx2");
 
 const STATUS_PENDING: u8 = 0;
 const STATUS_APPROVED: u8 = 1;

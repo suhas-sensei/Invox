@@ -1,0 +1,233 @@
+{
+  "address": "Cfi1HFakeABZCDo6CM282UdyYqUrsXQNgU5G4BsLwfpn",
+  "metadata": {
+    "name": "vendor_registry",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "record_spend",
+      "docs": [
+        "CPI target: record spend after successful invoice submission"
+      ],
+      "discriminator": [
+        111,
+        102,
+        17,
+        64,
+        245,
+        202,
+        79,
+        55
+      ],
+      "accounts": [
+        {
+          "name": "vendor",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "register_vendor",
+      "discriminator": [
+        192,
+        133,
+        122,
+        251,
+        31,
+        137,
+        113,
+        141
+      ],
+      "accounts": [
+        {
+          "name": "vendor",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  101,
+                  110,
+                  100,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vendor_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vendor_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "max_amount_cents",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "remove_vendor",
+      "discriminator": [
+        185,
+        246,
+        163,
+        42,
+        49,
+        45,
+        126,
+        36
+      ],
+      "accounts": [
+        {
+          "name": "vendor",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "validate_vendor",
+      "docs": [
+        "CPI target: validate vendor is approved and amount is within limits"
+      ],
+      "discriminator": [
+        124,
+        68,
+        54,
+        67,
+        37,
+        216,
+        93,
+        224
+      ],
+      "accounts": [
+        {
+          "name": "vendor"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_cents",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "VendorRecord",
+      "discriminator": [
+        110,
+        202,
+        127,
+        105,
+        242,
+        171,
+        90,
+        36
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NotApproved",
+      "msg": "Vendor not approved"
+    },
+    {
+      "code": 6001,
+      "name": "ExceedsLimit",
+      "msg": "Amount exceeds vendor limit"
+    }
+  ],
+  "types": [
+    {
+      "name": "VendorRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vendor_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "max_amount_cents",
+            "type": "u64"
+          },
+          {
+            "name": "approved",
+            "type": "bool"
+          },
+          {
+            "name": "total_spend",
+            "type": "u64"
+          },
+          {
+            "name": "invoice_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

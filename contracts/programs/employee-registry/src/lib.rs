@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("FJoYF2xDCeCkaFxEL7gXuavy6cWJ3mbtzwsock1h73bo");
+declare_id!("FErGeseBj3u79FUhFS7ZeDFByy3m9Yqh3BoDjXhNAUMu");
 
 #[program]
 pub mod employee_registry {
